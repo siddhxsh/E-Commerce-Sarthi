@@ -89,3 +89,28 @@ comparison = pd.DataFrame({
 
 print("\nMODEL COMPARISON\n")
 print(comparison)
+
+# Accuracy Bar Plot
+
+import matplotlib.pyplot as plt
+
+models = ["VADER", "TF-IDF + LR"]
+accuracies = [vader_acc, ml_acc]
+
+plt.figure(figsize=(6,4))
+plt.bar(models, accuracies)
+plt.ylim(0, 1)
+plt.ylabel("Accuracy")
+plt.title("Model Accuracy Comparison")
+plt.show()
+
+# F1-Score Bar Plot
+
+f1_scores = [vader_f1, ml_f1]
+
+plt.figure(figsize=(6,4))
+plt.bar(models, f1_scores)
+plt.ylim(0, 1)
+plt.ylabel("F1-score")
+plt.title("Model F1-score Comparison")
+plt.show()
