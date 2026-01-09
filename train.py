@@ -9,9 +9,9 @@ from sklearn.linear_model import LogisticRegression
 # ----------------------------
 # CONFIG
 # ----------------------------
-TEXT_COLUMN = "text"        # CHANGE ONLY IF NEEDED
+TEXT_COLUMN = "text"
 LABEL_COLUMN = "sentiment"
-FILE_NAME = "flipkart_product_cleaned.csv"
+FILE_NAME = "flipkart_product_cleaned.csv"   # 🔴 rename to actual file name
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(BASE_DIR, "data", FILE_NAME)
@@ -23,16 +23,13 @@ MODEL_DIR = os.path.join(BASE_DIR, "models")
 df = pd.read_csv(DATA_PATH)
 
 print("Dataset shape:", df.shape)
+print("\nSentiment distribution:")
 print(df[LABEL_COLUMN].value_counts())
 
 # ----------------------------
-# FORCE CLEAN TEXT COLUMN (CRITICAL)
+# CLEAN TEXT
 # ----------------------------
-print("NaN count BEFORE cleaning:", df[TEXT_COLUMN].isna().sum())
-
 df[TEXT_COLUMN] = df[TEXT_COLUMN].fillna("").astype(str)
-
-print("NaN count AFTER cleaning:", df[TEXT_COLUMN].isna().sum())
 
 # ----------------------------
 # FEATURE / LABEL SPLIT
@@ -51,39 +48,40 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
+print("\nTrain size:", X_train.shape)
+print("Test size:", X_test.shape)
+
 # ----------------------------
-# TF-IDF VECTORIZATION
+# TF-IDF VECTORIZER
 # ----------------------------
 tfidf = TfidfVectorizer(
-    ngram_range=(1, 2),
-    max_features=40000,
-    min_df=5,
+    ngram_range=(1, 3),
+    max_features=30000,
+    min_df=2,
     max_df=0.9,
     sublinear_tf=True
 )
 
 X_train_tfidf = tfidf.fit_transform(X_train)
-
 print("TF-IDF Train Shape:", X_train_tfidf.shape)
 
 # ----------------------------
-# MODEL TRAINING
+# LOGISTIC REGRESSION
 # ----------------------------
 model = LogisticRegression(
     max_iter=1000,
-    C=1.0,
-    n_jobs=-1,
-    solver="lbfgs"
+    solver="lbfgs",
+    class_weight="balanced"
 )
 
 model.fit(X_train_tfidf, y_train)
 
 # ----------------------------
-# SAVE MODEL & VECTORIZER
+# SAVE MODEL
 # ----------------------------
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 joblib.dump(tfidf, os.path.join(MODEL_DIR, "tfidf_vectorizer.joblib"))
 joblib.dump(model, os.path.join(MODEL_DIR, "logistic_model.joblib"))
 
-print("Training completed successfully.")
+print("\nTraining completed successfully.")
