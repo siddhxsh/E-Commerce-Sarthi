@@ -90,7 +90,7 @@ comparison = pd.DataFrame({
 print("\nMODEL COMPARISON\n")
 print(comparison)
 
-# Accuracy Bar Plot
+#Accuracy Bar Plot
 
 import matplotlib.pyplot as plt
 
