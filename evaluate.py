@@ -8,11 +8,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 # ----------------------------
-# CONFIG (MUST MATCH train.py)
+# CONFIG
 # ----------------------------
-TEXT_COLUMN = "text"        # SAME AS train.py
+TEXT_COLUMN = "text"
 LABEL_COLUMN = "sentiment"
-FILE_NAME = "flipkart_product_cleaned.csv"
+FILE_NAME = "flipkart_product_cleaned.csv"   # 🔴 same file as train.py
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(BASE_DIR, "data", FILE_NAME)
@@ -22,14 +22,14 @@ MODEL_DIR = os.path.join(BASE_DIR, "models")
 # LOAD DATA
 # ----------------------------
 df = pd.read_csv(DATA_PATH)
-
-# CLEAN TEXT (SAME AS TRAINING)
 df[TEXT_COLUMN] = df[TEXT_COLUMN].fillna("").astype(str)
 
 X = df[TEXT_COLUMN]
 y = df[LABEL_COLUMN]
 
-# SAME SPLIT AS TRAINING (CRITICAL)
+# ----------------------------
+# SAME SPLIT
+# ----------------------------
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -39,13 +39,13 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # ----------------------------
-# LOAD SAVED MODEL & VECTORIZER
+# LOAD MODEL
 # ----------------------------
 tfidf = joblib.load(os.path.join(MODEL_DIR, "tfidf_vectorizer.joblib"))
 model = joblib.load(os.path.join(MODEL_DIR, "logistic_model.joblib"))
 
 # ----------------------------
-# TRANSFORM + PREDICT
+# PREDICT
 # ----------------------------
 X_test_tfidf = tfidf.transform(X_test)
 y_pred = model.predict(X_test_tfidf)
@@ -54,7 +54,6 @@ y_pred = model.predict(X_test_tfidf)
 # METRICS
 # ----------------------------
 print("\nAccuracy:", accuracy_score(y_test, y_pred))
-
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
 
@@ -63,24 +62,9 @@ print(classification_report(y_test, y_pred))
 # ----------------------------
 cm = confusion_matrix(y_test, y_pred)
 
-plt.figure(figsize=(6, 5))
+plt.figure(figsize=(6,5))
 sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.title("Confusion Matrix")
-plt.tight_layout()
 plt.show()
-
-# ----------------------------
-# ERROR ANALYSIS
-# ----------------------------
-results = pd.DataFrame({
-    "text": X_test.values,
-    "actual": y_test.values,
-    "predicted": y_pred
-})
-
-errors = results[results["actual"] != results["predicted"]]
-
-print("\nSample Misclassified Reviews:")
-print(errors.sample(10))
